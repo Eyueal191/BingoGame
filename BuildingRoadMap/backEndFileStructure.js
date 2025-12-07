@@ -1,8 +1,7 @@
 /*
-
 backend/
 │
-├── server.js               # Entry point (can stay in root or in src/)
+├── server.js               # Entry point
 ├── .env
 ├── package.json
 │
@@ -16,17 +15,20 @@ backend/
     ├── models/
     │   ├── User.js
     │   ├── BingoCard.js
-    │   └── GameSession.js
+    │   ├── GameSession.js
+    │   └── Number.js        # <-- new model
     │
     ├── routes/
     │   ├── authRoutes.js
     │   ├── cardRoutes.js
-    │   └── gameRoutes.js
+    │   ├── gameRoutes.js
+    │   └── numberRoutes.js  # <-- new route for Number model
     │
     ├── controllers/
     │   ├── authController.js
     │   ├── cardController.js
-    │   └── gameController.js
+    │   ├── gameController.js
+    │   └── numberController.js  # <-- controller for Number model
     │
     ├── sockets/
     │   ├── index.js
@@ -44,6 +46,11 @@ backend/
     ├── middleware/
     │   └── authMiddleware.js
     │
-    └── seed/
-        └── seedCards.js
+    ├── seed/
+    │   ├── seedCards.js
+    │   └── seedNumbers.js     # <-- seed file for Number model
+    │
+    └── public/
+        └── dVoice/            # <-- place all your mp3 voice files here
+
 */

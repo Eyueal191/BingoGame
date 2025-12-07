@@ -19,7 +19,8 @@ frontend/
 │   │   ├── cardsStore.js        # Track user cards & reservations
 │   │   └── gameStore.js         # Track live game numbers & claims
 │   │
-│   ├── services/
+│   ├
+── services/
 │   │   └── socket.js            # Socket.io events & emitters
 │   │
 │   ├── hooks/
