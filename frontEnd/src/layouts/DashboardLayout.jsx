@@ -10,11 +10,10 @@ const DashboardLayout = () => {
       <NavBar />
 
       {/* Main content */}
-      <main className="flex-1 mt-16 p-4 bg-gray-50">
+      <main className="flex-1 bg-gray-50">
         <Outlet />
       </main>
     </div>
   );
 };
-
 export default DashboardLayout;

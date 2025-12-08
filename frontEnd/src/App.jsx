@@ -1,16 +1,9 @@
-import React, { Suspense, lazy } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import React, { Suspense, lazy, useEffect } from "react";
+import { Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import socket, { connectSocket, disconnectSocket } from "./services/socket.js";
 
-// Auth wrappers
-import ProtectedRoute from "./router/ProtectedRoute";
-import PublicRoute from "./router/PublicRoute";
-
-// Loading spinner
-import Loading from "./components/Loading";
-
-// Lazy-loaded layout and pages
 const DashboardLayout = lazy(() => import("./layouts/DashboardLayout"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const RegisterPage = lazy(() => import("./pages/RegisterPage"));
@@ -20,7 +13,40 @@ const CountdownPage = lazy(() => import("./pages/CountdownPage"));
 const GamePage = lazy(() => import("./pages/GamePage"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 
+import ProtectedRoute from "./router/ProtectedRoute";
+import PublicRoute from "./router/PublicRoute";
+import Loading from "./components/Loading";
+
 const App = () => {
+  useEffect(() => {
+    // ✅ Connect socket once when the app mounts, ensuring userId is attached
+    connectSocket(() => {
+      console.log("[SOCKET] Connected:", socket.id);
+
+      // Global listeners
+      socket.on("disconnect", (reason) => console.log("[SOCKET] Disconnected:", reason));
+      socket.on("connect_error", (err) => console.error("[SOCKET] Connection error:", err.message));
+      socket.on("error", (msg) => console.error("[SOCKET] Server error:", msg));
+
+      // Optional: log any cardsData broadcast from server
+      socket.on("cardsData", (cards) => {
+        console.log("[SOCKET] Received cardsData:", cards);
+      });
+    });
+
+    // Cleanup on unmount
+    return () => {
+      // Remove all global listeners
+      socket.off("disconnect");
+      socket.off("connect_error");
+      socket.off("error");
+      socket.off("cardsData");
+
+      // Disconnect socket gracefully
+      disconnectSocket();
+    };
+  }, []);
+
   return (
     <>
       <Suspense
@@ -39,17 +65,15 @@ const App = () => {
 
           {/* Protected routes */}
           <Route element={<ProtectedRoute />}>
-            {/* Default route "/" goes to DashboardLayout */}
             <Route path="/" element={<DashboardLayout />}>
-              {/* Default child of DashboardLayout */}
               <Route index element={<CardsPage />} />
-              <Route path="card/:id" element={<CardPreviewPage />} />
+              <Route path="card" element={<CardPreviewPage />} />
               <Route path="countdown" element={<CountdownPage />} />
               <Route path="game" element={<GamePage />} />
             </Route>
           </Route>
 
-          {/* Fallback route */}
+          {/* Catch-all */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>
