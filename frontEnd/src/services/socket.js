@@ -12,14 +12,19 @@ const socket = io(SOCKET_URL, {
   reconnectionDelayMax: 5000,
 });
 
-// Connect socket
+/**
+ * Connect socket
+ * Can be called anytime (e.g., after login)
+ */
 export const connectSocket = () => {
   if (!socket.connected) {
     socket.connect();
   }
 };
 
-// Optional: disconnect socket
+/**
+ * Disconnect socket
+ */
 export const disconnectSocket = () => {
   if (socket.connected) {
     socket.disconnect();
@@ -27,8 +32,11 @@ export const disconnectSocket = () => {
   }
 };
 
+// Socket event logs
 socket.on("connect", () => console.log("[SOCKET] Connected:", socket.id));
 socket.on("disconnect", (reason) => console.log("[SOCKET] Disconnected:", reason));
-socket.on("connect_error", (err) => console.error("[SOCKET] Connect error:", err.message));
+socket.on("connect_error", (err) =>
+  console.error("[SOCKET] Connect error:", err.message)
+);
 
 export default socket;

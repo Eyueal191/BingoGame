@@ -1,7 +1,8 @@
 // src/stores/authStore.js
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import Axios from "../api/axiosInstance.js"; // Axios with token interceptor
+import Axios from "../api/axiosInstance.js";
+import { connectSocket, disconnectSocket } from "../services/socket";
 
 const useAuthStore = create(
   persist(
@@ -10,33 +11,53 @@ const useAuthStore = create(
       token: null,
       isLoggedIn: false,
 
-      // Login action
+      /** ---------------------------
+       * Login action
+       * --------------------------- */
       login: (user, token) => {
         set({ user, token, isLoggedIn: true });
+
+        // Connect socket after login (no socket.auth needed)
+        connectSocket();
+        console.log("[AUTH] Socket connected for user:", user?._id);
+        localStorage.setItem("userId", user._id)
       },
 
-      // Logout action
+      /** ---------------------------
+       * Logout action
+       * --------------------------- */
       logout: () => {
         set({ user: null, token: null, isLoggedIn: false });
+
+        // Disconnect socket on logout
+        disconnectSocket();
+        console.log("[AUTH] Socket disconnected on logout");
       },
 
-      // Check authentication
+      /** ---------------------------
+       * Check authentication
+       * --------------------------- */
       checkAuth: async () => {
         const token = get().token;
 
-        // Don't call API if no token
         if (!token) {
           get().logout();
           return false;
         }
 
         try {
-          // Axios automatically attaches the token via interceptor
           const res = await Axios.get("/api/auth/check-auth");
 
           if (res.data.success) {
             const user = res.data.user;
             set({ user, isLoggedIn: true });
+
+            // Connect socket if not already connected
+            if (!res.data.socketConnected) {
+              connectSocket();
+              console.log("[AUTH] Socket connected for user:", user?._id);
+            }
+
             return true;
           } else {
             get().logout();
@@ -49,9 +70,13 @@ const useAuthStore = create(
       },
     }),
     {
-      name: "auth-storage", // unique name for localStorage key
-      getStorage: () => localStorage, // you can also use sessionStorage if needed
-      partialize: (state) => ({ user: state.user, token: state.token, isLoggedIn: state.isLoggedIn }),
+      name: "auth-storage",
+      getStorage: () => localStorage,
+      partialize: (state) => ({
+        user: state.user,
+        token: state.token,
+        isLoggedIn: state.isLoggedIn,
+      }),
     }
   )
 );

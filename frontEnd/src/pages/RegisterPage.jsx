@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import Axios from "../api/axiosInstance.js";
 import { toast } from "react-toastify";
+import CountDownPage from "../assets/CountDownPage.png";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -51,12 +52,37 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900 px-4 font-poppins">
-      <div className="w-full max-w-md sm:max-w-lg lg:max-w-xl bg-gray-800/80 backdrop-blur-lg rounded-3xl shadow-2xl p-6 sm:p-8 md:p-10 transform hover:scale-105 transition-transform duration-300">
-        <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-center text-green-400 mb-6 sm:mb-8 tracking-wide animate-pulse">
+    <div
+      className="relative w-full min-h-screen flex items-center justify-center text-white overflow-hidden p-4 sm:p-6"
+      style={{
+        backgroundImage: `url(${CountDownPage})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-0" />
+
+      {/* Main content */}
+      <div className="relative z-10 w-full max-w-md sm:max-w-lg lg:max-w-xl p-6 sm:p-8 md:p-10 bg-gray-800/80 backdrop-blur-lg rounded-3xl shadow-2xl animate-float">
+        {/* Floating animation */}
+        <style>{`
+          @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0px); }
+          }
+          .animate-float {
+            animation: float 3s ease-in-out infinite;
+          }
+        `}</style>
+
+        {/* Header */}
+        <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-center text-green-400 mb-8 animate-pulse">
           Join the Bingo Arena!
         </h2>
 
+        {/* Error message */}
         {error && (
           <div className="bg-red-700 text-red-100 p-3 rounded-lg mb-5 text-center font-semibold text-sm sm:text-base">
             {error}
@@ -136,6 +162,7 @@ const RegisterPage = () => {
           </button>
         </form>
 
+        {/* Login link */}
         <p className="mt-6 text-center text-gray-200 text-sm sm:text-base">
           Already have an account?{" "}
           <span

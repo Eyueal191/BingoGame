@@ -1,4 +1,6 @@
+// src/pages/GamePage.jsx
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import useGameStore from "../stores/gameStore.js";
 import useCardsStore from "../hooks/useCards.js";
 import useAuthStore from "../stores/authStore.js";
@@ -8,8 +10,9 @@ import voiceList from "../assets/voiceList.js";
 import PlayCard from "../components/PlayCard.jsx";
 
 function GamePage() {
+  const navigate = useNavigate();
   const { numbers, attachListeners, detachListeners, startGame } = useGameStore();
-  const { cards, attachListeners: attachCardListeners, cleanup } = useCardsStore();
+  const { cards, attachListeners: attachCardListeners, cleanup, reservedcardCount } = useCardsStore();
   const { user } = useAuthStore();
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -21,6 +24,13 @@ function GamePage() {
   const [soundOn, setSoundOn] = useState(true);
   const [voiceUrl, setVoiceUrl] = useState("");
   const [userMarked, setUserMarked] = useState([]);
+
+  // NAVIGATE TO LOSER PAGE IF RESERVED CARD COUNT IS ZERO
+  useEffect(() => {
+    if (reservedcardCount === 0) {
+      navigate("/loser");
+    }
+  }, [reservedcardCount, navigate]);
 
   // INIT GAME
   useEffect(() => {
@@ -119,6 +129,11 @@ function GamePage() {
             {new Date().toLocaleTimeString()}
           </p>
 
+          {/* PLAYER COUNT */}
+          <p className="text-gray-600 text-sm flex items-center gap-1">
+            <span className="font-medium">Players:</span> {reservedcardCount || 0}
+          </p>
+
           <button
             onClick={handleToggleSound}
             className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 shadow-sm"
@@ -133,16 +148,13 @@ function GamePage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-
         {/* LEFT SIDE */}
         <div className="flex flex-col gap-8">
           {/* Last Called */}
           <div className="bg-blue-600 text-white rounded-2xl shadow-xl p-8 text-center">
             <h3 className="text-lg font-semibold opacity-80">Last Called</h3>
 
-            <div className={`text-5xl font-extrabold mt-3 ${
-              drawnNumber ? "animate-pulse text-yellow-300 drop-shadow-md" : ""
-            }`}>
+            <div className={`text-5xl font-extrabold mt-3 ${drawnNumber ? "animate-pulse text-yellow-300 drop-shadow-md" : ""}`}>
               {drawnNumber ? `${drawnNumber.letter}-${drawnNumber.number}` : "—"}
             </div>
 
@@ -211,7 +223,6 @@ function GamePage() {
             ))}
           </div>
         </div>
-
       </div>
     </div>
   );

@@ -25,7 +25,7 @@ const CardsPage = () => {
     if (reservedcardCount >= 2){
         setTimeout(() => {
              navigate("/countdown")
-        },50000);
+        },2000);
     };
   }, [reservedcardCount, navigate]);
 

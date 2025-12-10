@@ -8,11 +8,11 @@ const DashboardLayout = lazy(() => import("./layouts/DashboardLayout"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const RegisterPage = lazy(() => import("./pages/RegisterPage"));
 const CardsPage = lazy(() => import("./pages/CardsPage"));
-const CardPreviewPage = lazy(() => import("./pages/CardPreviewPage"));
 const CountdownPage = lazy(() => import("./pages/CountdownPage"));
 const GamePage = lazy(() => import("./pages/GamePage"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
-
+const WinnerPage = lazy(()=> import("./pages/WinnerPage.jsx"));
+const LoserPage = lazy(()=> import("./pages/LoserPage.jsx"));
 import ProtectedRoute from "./router/ProtectedRoute";
 import PublicRoute from "./router/PublicRoute";
 import Loading from "./components/Loading";
@@ -67,9 +67,10 @@ const App = () => {
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<DashboardLayout />}>
               <Route index element={<CardsPage />} />
-              <Route path="card" element={<CardPreviewPage />} />
               <Route path="countdown" element={<CountdownPage />} />
-              <Route path="game" element={<GamePage />} />
+              <Route path="game" element={<GamePage />} />     
+<Route path="winner" element={<WinnerPage />} />
+<Route path="loser" element={<LoserPage />} />
             </Route>
           </Route>
 

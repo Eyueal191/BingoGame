@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const { Schema, model } = mongoose;
 
 // Define all possible winning patterns as arrays of indices
-const WIN_PATTERNS = [
+export const WIN_PATTERNS = [
   // Rows
   [[0,0],[0,1],[0,2],[0,3],[0,4]],
   [[1,0],[1,1],[1,2],[1,3],[1,4]],
@@ -24,21 +24,30 @@ const WIN_PATTERNS = [
 ];
 
 const gameSessionSchema = new Schema({
-  startTime: { type: Date, required: true },
-  endTime: { type: Date, required: true },
+  startTime: { type: Date, required: true }, // required at creation
+  endTime: { type: Date, default: null },   // optional, set when game ends
+
   winner: {
     type: Schema.Types.ObjectId,
     ref: "User",   // or "Player"
-    default: null  // null = draw
+    default: null  // null until someone wins
   },
+
   winnerCard: {
-    type: [[Number]], // 2D array of numbers representing the card
-    required: true
+    type: [[Number]], // 2D array representing the winning card
+    default: null     // optional until someone wins
   },
+
   winnerPattern: {
-    type: [[Number]],  // must match one of the WIN_PATTERNS
-    enum: WIN_PATTERNS,
+    type: [[Number]],  // optional, set when there is a winning pattern
     default: null
   },
+
+  players: {
+    type: [Schema.Types.ObjectId],
+    ref: "User",
+    required: true    // must have players at creation
+  }
 });
+
 export default model("GameSession", gameSessionSchema);
