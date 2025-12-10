@@ -2,8 +2,8 @@ import mongoose from "mongoose";
 
 const bingoCardSchema = new mongoose.Schema({
   numbers: {
-    type: [[Number]], // 2D array (5x5 bingo numbers)
-    required: true,
+    type: Object,
+    default: { B: [], I: [], N: [], G: [], O: [] }, // default empty columns
   },
   reserved: {
     type: Boolean,
@@ -11,9 +11,15 @@ const bingoCardSchema = new mongoose.Schema({
   },
   reservedBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User", // references the User who reserved
+    ref: "User",
     default: null,
   },
+  number: {
+    type: Number,
+    enum: Array.from({ length: 20 }, (_, i) => i + 1), // 1 to 20
+    required: true,
+  },
 });
-let Card =  mongoose.model("Card", bingoCardSchema);
+
+const Card = mongoose.model("Card", bingoCardSchema);
 export default Card;

@@ -1,1 +1,23 @@
 @import "tailwindcss";
+@keyframes pulseSide {
+  0%, 100% {
+    transform: translateX(0) scale(1);
+    box-shadow: 0 0 0 rgba(255, 212, 0, 0.5);
+  }
+  25% {
+    transform: translateX(5px) scale(1.05);
+    box-shadow: 0 0 15px rgba(255, 212, 0, 0.7);
+  }
+  50% {
+    transform: translateX(-5px) scale(1.1);
+    box-shadow: 0 0 20px rgba(255, 212, 0, 0.8);
+  }
+  75% {
+    transform: translateX(5px) scale(1.05);
+    box-shadow: 0 0 15px rgba(255, 212, 0, 0.7);
+  }
+}
+
+.animate-pulseSide {
+  animation: pulseSide 1.5s infinite;
+}

@@ -93,7 +93,7 @@ function GamePage() {
 
   useEffect(() => {
     if (!gameStarted || numbers.length === 0) return;
-    const intervalId = setInterval(drawNumber, 5000);
+    const intervalId = setInterval(drawNumber, 6000);
     return () => clearInterval(intervalId);
   }, [numbers, currentIndex, gameStarted, soundOn]);
 

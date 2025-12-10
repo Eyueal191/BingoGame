@@ -1,43 +1,259 @@
-import connectDB from "../config/db.js";
+import connectDB from "../../config/db.js";
 import dotenv from "dotenv";
-import Card from "../models/Card.js"; // adjust path if needed
+import Card from "../../models/Card.js"; // adjust path if needed
 
 dotenv.config();
-connectDB()
+connectDB();
 
-// Helper to generate a single 5x5 Bingo card
-function generateBingoCard() {
-  const card = [];
+// Hardcoded 20 Bingo cards
+const cards = [
+  {
+    numbers: {
+      B: [1, 2, 3, 4, 5],
+      I: [16, 17, 18, 19, 20],
+      N: [31, 32, "FREE", 34, 35],
+      G: [46, 47, 48, 49, 50],
+      O: [61, 62, 63, 64, 65],
+    },
+    reserved: false,
+    reservedBy: null,
+    number: 1,
+  },
+  {
+    numbers: {
+      B: [6, 7, 8, 9, 10],
+      I: [21, 22, 23, 24, 25],
+      N: [36, 37, "FREE", 39, 40],
+      G: [51, 52, 53, 54, 55],
+      O: [66, 67, 68, 69, 70],
+    },
+    reserved: false,
+    reservedBy: null,
+    number: 2,
+  },
+  {
+    numbers: {
+      B: [11, 12, 13, 14, 15],
+      I: [26, 27, 28, 29, 30],
+      N: [41, 42, "FREE", 44, 45],
+      G: [56, 57, 58, 59, 60],
+      O: [71, 72, 73, 74, 75],
+    },
+    reserved: false,
+    reservedBy: null,
+    number: 3,
+  },
+  {
+    numbers: {
+      B: [1, 3, 5, 7, 9],
+      I: [16, 18, 20, 22, 24],
+      N: [31, 33, "FREE", 35, 37],
+      G: [46, 48, 50, 52, 54],
+      O: [61, 63, 65, 67, 69],
+    },
+    reserved: false,
+    reservedBy: null,
+    number: 4,
+  },
+  {
+    numbers: {
+      B: [2, 4, 6, 8, 10],
+      I: [17, 19, 21, 23, 25],
+      N: [32, 34, "FREE", 36, 38],
+      G: [47, 49, 51, 53, 55],
+      O: [62, 64, 66, 68, 70],
+    },
+    reserved: false,
+    reservedBy: null,
+    number: 5,
+  },
+  {
+    numbers: {
+      B: [1, 6, 11, 2, 7],
+      I: [16, 21, 26, 17, 22],
+      N: [31, 36, "FREE", 32, 37],
+      G: [46, 51, 56, 47, 52],
+      O: [61, 66, 71, 62, 67],
+    },
+    reserved: false,
+    reservedBy: null,
+    number: 6,
+  },
+  {
+    numbers: {
+      B: [3, 8, 13, 4, 9],
+      I: [18, 23, 28, 19, 24],
+      N: [33, 38, "FREE", 34, 39],
+      G: [48, 53, 58, 49, 54],
+      O: [63, 68, 73, 64, 69],
+    },
+    reserved: false,
+    reservedBy: null,
+    number: 7,
+  },
+  {
+    numbers: {
+      B: [5, 10, 15, 1, 6],
+      I: [20, 25, 16, 21, 17],
+      N: [35, 40, "FREE", 31, 36],
+      G: [50, 55, 46, 51, 47],
+      O: [65, 70, 61, 66, 62],
+    },
+    reserved: false,
+    reservedBy: null,
+    number: 8,
+  },
+  {
+    numbers: {
+      B: [2, 7, 12, 3, 8],
+      I: [17, 22, 27, 18, 23],
+      N: [32, 37, "FREE", 33, 38],
+      G: [47, 52, 57, 48, 53],
+      O: [62, 67, 72, 63, 68],
+    },
+    reserved: false,
+    reservedBy: null,
+    number: 9,
+  },
+  {
+    numbers: {
+      B: [4, 9, 14, 5, 10],
+      I: [19, 24, 29, 20, 25],
+      N: [34, 39, "FREE", 35, 40],
+      G: [49, 54, 59, 50, 55],
+      O: [64, 69, 74, 65, 70],
+    },
+    reserved: false,
+    reservedBy: null,
+    number: 10,
+  },
+  // Remaining 10 cards
+  {
+    numbers: {
+      B: [1, 2, 3, 4, 5],
+      I: [16, 17, 18, 19, 20],
+      N: [31, 32, "FREE", 33, 34],
+      G: [46, 47, 48, 49, 50],
+      O: [61, 62, 63, 64, 65],
+    },
+    reserved: false,
+    reservedBy: null,
+    number: 11,
+  },
+  {
+    numbers: {
+      B: [6, 7, 8, 9, 10],
+      I: [21, 22, 23, 24, 25],
+      N: [36, 37, "FREE", 38, 39],
+      G: [51, 52, 53, 54, 55],
+      O: [66, 67, 68, 69, 70],
+    },
+    reserved: false,
+    reservedBy: null,
+    number: 12,
+  },
+  {
+    numbers: {
+      B: [11, 12, 13, 14, 15],
+      I: [26, 27, 28, 29, 30],
+      N: [41, 42, "FREE", 43, 44],
+      G: [56, 57, 58, 59, 60],
+      O: [71, 72, 73, 74, 75],
+    },
+    reserved: false,
+    reservedBy: null,
+    number: 13,
+  },
+  {
+    numbers: {
+      B: [1, 3, 5, 7, 9],
+      I: [16, 18, 20, 22, 24],
+      N: [31, 33, "FREE", 35, 37],
+      G: [46, 48, 50, 52, 54],
+      O: [61, 63, 65, 67, 69],
+    },
+    reserved: false,
+    reservedBy: null,
+    number: 14,
+  },
+  {
+    numbers: {
+      B: [2, 4, 6, 8, 10],
+      I: [17, 19, 21, 23, 25],
+      N: [32, 34, "FREE", 36, 38],
+      G: [47, 49, 51, 53, 55],
+      O: [62, 64, 66, 68, 70],
+    },
+    reserved: false,
+    reservedBy: null,
+    number: 15,
+  },
+  {
+    numbers: {
+      B: [1, 6, 11, 2, 7],
+      I: [16, 21, 26, 17, 22],
+      N: [31, 36, "FREE", 32, 37],
+      G: [46, 51, 56, 47, 52],
+      O: [61, 66, 71, 62, 67],
+    },
+    reserved: false,
+    reservedBy: null,
+    number: 16,
+  },
+  {
+    numbers: {
+      B: [3, 8, 13, 4, 9],
+      I: [18, 23, 28, 19, 24],
+      N: [33, 38, "FREE", 34, 39],
+      G: [48, 53, 58, 49, 54],
+      O: [63, 68, 73, 64, 69],
+    },
+    reserved: false,
+    reservedBy: null,
+    number: 17,
+  },
+  {
+    numbers: {
+      B: [5, 10, 15, 1, 6],
+      I: [20, 25, 16, 21, 17],
+      N: [35, 40, "FREE", 31, 36],
+      G: [50, 55, 46, 51, 47],
+      O: [65, 70, 61, 66, 62],
+    },
+    reserved: false,
+    reservedBy: null,
+    number: 18,
+  },
+  {
+    numbers: {
+      B: [2, 7, 12, 3, 8],
+      I: [17, 22, 27, 18, 23],
+      N: [32, 37, "FREE", 33, 38],
+      G: [47, 52, 57, 48, 53],
+      O: [62, 67, 72, 63, 68],
+    },
+    reserved: false,
+    reservedBy: null,
+    number: 19,
+  },
+  {
+    numbers: {
+      B: [4, 9, 14, 5, 10],
+      I: [19, 24, 29, 20, 25],
+      N: [34, 39, "FREE", 35, 40],
+      G: [49, 54, 59, 50, 55],
+      O: [64, 69, 74, 65, 70],
+    },
+    reserved: false,
+    reservedBy: null,
+    number: 20,
+  },
+];
 
-  for (let row = 0; row < 5; row++) {
-    const newRow = [];
-    while (newRow.length < 5) {
-      const num = Math.floor(Math.random() * 75) + 1; // numbers 1-75
-      if (!newRow.includes(num)) newRow.push(num);
-    }
-    card.push(newRow);
-  }
-
-  // Optional: center free space
-  card[2][2] = 0;
-
-  return card;
-}
-
-// Seed 20 Bingo cards
 async function seedCards() {
   try {
     await Card.deleteMany(); // clear existing cards
     console.log("🗑️ Existing cards cleared");
-
-    const cards = [];
-    for (let i = 0; i < 20; i++) {
-      cards.push({
-        numbers: generateBingoCard(),
-        reserved: false,
-        reservedBy: null,
-      });
-    }
 
     await Card.insertMany(cards);
     console.log("✅ 20 Bingo cards inserted successfully!");

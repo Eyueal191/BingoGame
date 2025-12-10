@@ -1,58 +1,59 @@
 // src/stores/authStore.js
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import Axios from "../api/axiosInstance.js"; // Axios with token interceptor
 
-const useAuthStore = create((set, get) => ({
-  user: JSON.parse(localStorage.getItem("user")) || null,
-  token: localStorage.getItem("token") || null,
-  isLoggedIn: localStorage.getItem("isLoggedIn") === "true" || false,
+const useAuthStore = create(
+  persist(
+    (set, get) => ({
+      user: null,
+      token: null,
+      isLoggedIn: false,
 
-  // Login action
-  login: (user, token) => {
-    localStorage.setItem("user", JSON.stringify(user));
-    localStorage.setItem("token", token);
-    localStorage.setItem("isLoggedIn", "true");
+      // Login action
+      login: (user, token) => {
+        set({ user, token, isLoggedIn: true });
+      },
 
-    set({ user, token, isLoggedIn: true });
-  },
+      // Logout action
+      logout: () => {
+        set({ user: null, token: null, isLoggedIn: false });
+      },
 
-  // Logout action
-  logout: () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    localStorage.removeItem("isLoggedIn");
+      // Check authentication
+      checkAuth: async () => {
+        const token = get().token;
 
-    set({ user: null, token: null, isLoggedIn: false });
-  },
+        // Don't call API if no token
+        if (!token) {
+          get().logout();
+          return false;
+        }
 
-  // Check authentication
-  checkAuth: async () => {
-    const token = get().token;
+        try {
+          // Axios automatically attaches the token via interceptor
+          const res = await Axios.get("/api/auth/check-auth");
 
-    // Don't call API if no token
-    if (!token) {
-      get().logout();
-      return false;
+          if (res.data.success) {
+            const user = res.data.user;
+            set({ user, isLoggedIn: true });
+            return true;
+          } else {
+            get().logout();
+            return false;
+          }
+        } catch (error) {
+          get().logout();
+          return false;
+        }
+      },
+    }),
+    {
+      name: "auth-storage", // unique name for localStorage key
+      getStorage: () => localStorage, // you can also use sessionStorage if needed
+      partialize: (state) => ({ user: state.user, token: state.token, isLoggedIn: state.isLoggedIn }),
     }
-
-    try {
-      // Axios already attaches the token via interceptor
-      const res = await Axios.get("/api/auth/check-auth");
-
-      if (res.data.success) {
-        const user = res.data.user;
-        set({ user, isLoggedIn: true });
-        localStorage.setItem("user", JSON.stringify(user));
-        return true;
-      } else {
-        get().logout();
-        return false;
-      }
-    } catch (error) {
-      get().logout();
-      return false;
-    }
-  },
-}));
+  )
+);
 
 export default useAuthStore;

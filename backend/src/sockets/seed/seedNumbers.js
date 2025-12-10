@@ -1,51 +1,119 @@
 import mongoose from "mongoose";
-import Number from "../models/Number.js";
-import connectDB from "../config/db.js";
+import Number from "../../models/Number.js";
+import connectDB from "../../config/db.js";
 import dotenv from "dotenv";
 dotenv.config();
-// Base URL for GitHub Pages or local testing
-const BASE_URL = "https://eyueal191.github.io/BingoGame/backend/src/public/dVoice/";
-// const BASE_URL = "http://localhost:5000/public/dVoice/"; // for local testing
 
-// Helper function to generate number ranges for each letter
-const generateNumbers = (letter, start, end, prefix) => {
-  const arr = [];
-  for (let i = start; i <= end; i++) {
-    const fileName = `${prefix}${i}.mp3`;
-    arr.push({
-      letter,
-      number: i,
-      voiceUrl: `${BASE_URL}${fileName}`,
-    });
+// Manual array of 75 Bingo numbers with voice as just filename
+const numbersSeed = [
+  // B: 1-15
+  { letter: "B", number: 1, voice: "db1.mp3" },
+  { letter: "B", number: 2, voice: "db2.mp3" },
+  { letter: "B", number: 3, voice: "db3.mp3" },
+  { letter: "B", number: 4, voice: "db4.mp3" },
+  { letter: "B", number: 5, voice: "db5.mp3" },
+  { letter: "B", number: 6, voice: "db6.mp3" },
+  { letter: "B", number: 7, voice: "db7.mp3" },
+  { letter: "B", number: 8, voice: "db8.mp3" },
+  { letter: "B", number: 9, voice: "db9.mp3" },
+  { letter: "B", number: 10, voice: "db10.mp3" },
+  { letter: "B", number: 11, voice: "db11.mp3" },
+  { letter: "B", number: 12, voice: "db12.mp3" },
+  { letter: "B", number: 13, voice: "db13.mp3" },
+  { letter: "B", number: 14, voice: "db14.mp3" },
+  { letter: "B", number: 15, voice: "db15.mp3" },
+
+  // I: 16-30
+  { letter: "I", number: 16, voice: "di16.mp3" },
+  { letter: "I", number: 17, voice: "di17.mp3" },
+  { letter: "I", number: 18, voice: "di18.mp3" },
+  { letter: "I", number: 19, voice: "di19.mp3" },
+  { letter: "I", number: 20, voice: "di20.mp3" },
+  { letter: "I", number: 21, voice: "di21.mp3" },
+  { letter: "I", number: 22, voice: "di22.mp3" },
+  { letter: "I", number: 23, voice: "di23.mp3" },
+  { letter: "I", number: 24, voice: "di24.mp3" },
+  { letter: "I", number: 25, voice: "di25.mp3" },
+  { letter: "I", number: 26, voice: "di26.mp3" },
+  { letter: "I", number: 27, voice: "di27.mp3" },
+  { letter: "I", number: 28, voice: "di28.mp3" },
+  { letter: "I", number: 29, voice: "di29.mp3" },
+  { letter: "I", number: 30, voice: "di30.mp3" },
+
+  // N: 31-45
+  { letter: "N", number: 31, voice: "dn31.mp3" },
+  { letter: "N", number: 32, voice: "dn32.mp3" },
+  { letter: "N", number: 33, voice: "dn33.mp3" },
+  { letter: "N", number: 34, voice: "dn34.mp3" },
+  { letter: "N", number: 35, voice: "dn35.mp3" },
+  { letter: "N", number: 36, voice: "dn36.mp3" },
+  { letter: "N", number: 37, voice: "dn37.mp3" },
+  { letter: "N", number: 38, voice: "dn38.mp3" },
+  { letter: "N", number: 39, voice: "dn39.mp3" },
+  { letter: "N", number: 40, voice: "dn40.mp3" },
+  { letter: "N", number: 41, voice: "dn41.mp3" },
+  { letter: "N", number: 42, voice: "dn42.mp3" },
+  { letter: "N", number: 43, voice: "dn43.mp3" },
+  { letter: "N", number: 44, voice: "dn44.mp3" },
+  { letter: "N", number: 45, voice: "dn45.mp3" },
+
+  // G: 46-60
+  { letter: "G", number: 46, voice: "dg46.mp3" },
+  { letter: "G", number: 47, voice: "dg47.mp3" },
+  { letter: "G", number: 48, voice: "dg48.mp3" },
+  { letter: "G", number: 49, voice: "dg49.mp3" },
+  { letter: "G", number: 50, voice: "dg50.mp3" },
+  { letter: "G", number: 51, voice: "dg51.mp3" },
+  { letter: "G", number: 52, voice: "dg52.mp3" },
+  { letter: "G", number: 53, voice: "dg53.mp3" },
+  { letter: "G", number: 54, voice: "dg54.mp3" },
+  { letter: "G", number: 55, voice: "dg55.mp3" },
+  { letter: "G", number: 56, voice: "dg56.mp3" },
+  { letter: "G", number: 57, voice: "dg57.mp3" },
+  { letter: "G", number: 58, voice: "dg58.mp3" },
+  { letter: "G", number: 59, voice: "dg59.mp3" },
+  { letter: "G", number: 60, voice: "dg60.mp3" },
+
+  // O: 61-75
+  { letter: "O", number: 61, voice: "do61.mp3" },
+  { letter: "O", number: 62, voice: "do62.mp3" },
+  { letter: "O", number: 63, voice: "do63.mp3" },
+  { letter: "O", number: 64, voice: "do64.mp3" },
+  { letter: "O", number: 65, voice: "do65.mp3" },
+  { letter: "O", number: 66, voice: "do66.mp3" },
+  { letter: "O", number: 67, voice: "do67.mp3" },
+  { letter: "O", number: 68, voice: "do68.mp3" },
+  { letter: "O", number: 69, voice: "do69.mp3" },
+  { letter: "O", number: 70, voice: "do70.mp3" },
+  { letter: "O", number: 71, voice: "do71.mp3" },
+  { letter: "O", number: 72, voice: "do72.mp3" },
+  { letter: "O", number: 73, voice: "do73.mp3" },
+  { letter: "O", number: 74, voice: "do74.mp3" },
+  { letter: "O", number: 75, voice: "do75.mp3" },
+];
+
+// Shuffle function (Fisher–Yates)
+const shuffleArray = (array) => {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
   }
-  return arr;
+  return array;
 };
 
-// Seed array combining B, I, N, G, O
-const numbersSeed = [
-  ...generateNumbers("B", 1, 15, "db"),
-  ...generateNumbers("I", 16, 30, "di"),
-  ...generateNumbers("N", 31, 45, "dn"),
-  ...generateNumbers("G", 46, 60, "dg"),
-  ...generateNumbers("O", 61, 75, "do"),
-];
+shuffleArray(numbersSeed);
 
 const seedDB = async () => {
   try {
-    // Connect to MongoDB using your modular connectDB
     await connectDB();
-
     console.log("Connected to MongoDB");
 
-    // Clear old Number data
     await Number.deleteMany({});
     console.log("Old Number collection cleared");
 
-    // Insert new seed data
     await Number.insertMany(numbersSeed);
     console.log("Number collection seeded successfully!");
 
-    // Disconnect
     await mongoose.disconnect();
     console.log("MongoDB disconnected");
   } catch (err) {
@@ -53,5 +121,4 @@ const seedDB = async () => {
   }
 };
 
-// Run the seed script
 seedDB();
