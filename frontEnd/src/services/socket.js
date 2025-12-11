@@ -1,10 +1,10 @@
 import { io } from "socket.io-client";
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
+const SOCKET_URL =
+  import.meta.env.VITE_SOCKET_URL || "https://bingogame-5pg5.onrender.com";
 
 const socket = io(SOCKET_URL, {
   autoConnect: false,
-  transports: ["websocket"],
   withCredentials: true,
   reconnection: true,
   reconnectionAttempts: 10,
@@ -34,7 +34,9 @@ export const disconnectSocket = () => {
 
 // Socket event logs
 socket.on("connect", () => console.log("[SOCKET] Connected:", socket.id));
-socket.on("disconnect", (reason) => console.log("[SOCKET] Disconnected:", reason));
+socket.on("disconnect", (reason) =>
+  console.log("[SOCKET] Disconnected:", reason)
+);
 socket.on("connect_error", (err) =>
   console.error("[SOCKET] Connect error:", err.message)
 );
