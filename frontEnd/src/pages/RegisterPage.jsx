@@ -128,7 +128,6 @@ const RegisterPage = () => {
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
           </div>
-
           {/* Confirm Password */}
           <div className="relative">
             <input

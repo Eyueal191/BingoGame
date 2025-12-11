@@ -9,7 +9,7 @@ dotenv.config();
 const httpServer = http.createServer(app);
 
 // Exact frontend origin for CORS
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+const FRONTEND_URL = process.env.FRONTEND_URL
 
 const io = new Server(httpServer, {
   cors: {
