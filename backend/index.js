@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import { Server } from "socket.io";
 import cors from "cors";
 import socketLoader from "./src/sockets/index.js";
+import { dynamicCorsOptions } from "./src/utils/corsConfig.js";
 
 dotenv.config();
 
@@ -14,32 +15,23 @@ const httpServer = http.createServer(app);
 // EXPRESS – Dynamic CORS
 // --------------------------
 app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin) return callback(null, true); // allow Postman / server-to-server
-      console.log("🌍 CORS request from:", origin);
-      callback(null, true); // dynamically allow all
-    },
-    credentials: true, // allows cookies / auth headers
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
+  cors(dynamicCorsOptions(),
+)
 );
-
+app.use((req, res, next) => {
+  if (req.method === "OPTIONS") {
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    return res.sendStatus(204); // respond to preflight
+  }
+  next();
+});
 //
 // --------------------------
 // SOCKET.IO – Dynamic CORS
 // --------------------------
 const io = new Server(httpServer, {
-  cors: {
-    origin: (origin, callback) => {
-      if (!origin) return callback(null, true); // allow tools like Postman
-      console.log("🔌 Socket request from:", origin);
-      return callback(null, true); // allow all domains dynamically
-    },
-    credentials: true, // allows auth headers through WebSocket
-    methods: ["GET", "POST"],
-  },
+  cors: dynamicCorsOptions(["GET", "POST"]),
   transports: ["websocket", "polling"],
   allowEIO3: true,
 });
