@@ -18,14 +18,8 @@ app.use(
   cors(dynamicCorsOptions(),
 )
 );
-app.use((req, res, next) => {
-  if (req.method === "OPTIONS") {
-    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-    return res.sendStatus(204); // respond to preflight
-  }
-  next();
-});
+app.options(/.*/, cors(dynamicCorsOptions));
+
 //
 // --------------------------
 // SOCKET.IO – Dynamic CORS
