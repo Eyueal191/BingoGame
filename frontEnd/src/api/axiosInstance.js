@@ -3,7 +3,7 @@ import axios from "axios";
 import  authStore  from "../stores/authStore.js"; // use store directly
 
 const Axios = axios.create({
-  baseURL:import.meta.env.VITE_BACKEND_URL || "https://bingogame-5pg5.onrender.com",
+  baseURL:"https://bingogame-5pg5.onrender.com",
   headers: {
     "Content-Type": "application/json",
   },
