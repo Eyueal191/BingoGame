@@ -1,13 +1,14 @@
 // src/components/BingoCard.jsx
-import React from "react";
-import useCardsStore from "../hooks/useCards";
-import useAuthStore from "../stores/authStore";
+import React, { useContext } from "react";
+import { SocketContext } from "../contexts/SocketContext.jsx";
+import AuthContext from "../contexts/AuthContext.jsx";
 
 const BingoCard = ({ card }) => {
   const { numbers: bingoNumbers = {}, reserved, _id, number } = card;
   const bingoHeader = ["B", "I", "N", "G", "O"];
-  const { reserveCard, unreserveCard } = useCardsStore();
-  const { user } = useAuthStore();
+
+  const { reserveCard, unreserveCard } = useContext(SocketContext);
+  const { user } = useContext(AuthContext);
 
   if (!user) return null; // prevent errors if user is not logged in
 
@@ -22,7 +23,7 @@ const BingoCard = ({ card }) => {
         {reserved ? "Reserved" : "Available"}
       </div>
 
-      {/* --- CARD NUMBER AT TOP RIGHT (Updated) --- */}
+      {/* --- CARD NUMBER AT TOP RIGHT --- */}
       <div className="absolute top-3 right-3 text-sm md:text-base lg:text-lg font-extrabold text-white bg-green-600 px-3 py-1 rounded-xl shadow-lg">
         #{number}
       </div>
@@ -73,7 +74,7 @@ const BingoCard = ({ card }) => {
       {/* --- RESERVE / UNRESERVE BUTTONS --- */}
       <div className="mt-6 flex flex-col sm:flex-row gap-3">
         <button
-          onClick={() => reserveCard({ cardId: _id, user })}
+          onClick={() => reserveCard({ cardId: _id, userId: user._id })}
           disabled={reserved}
           className={`flex-1 py-3 rounded-xl font-semibold text-sm md:text-base transition-all duration-200
             shadow-md ${reserved
@@ -85,7 +86,7 @@ const BingoCard = ({ card }) => {
         </button>
 
         <button
-          onClick={() => unreserveCard({ cardId: _id, user })}
+          onClick={() => unreserveCard({ cardId: _id, userId: user._id })}
           disabled={!reserved}
           className={`flex-1 py-3 rounded-xl font-semibold text-sm md:text-base transition-all duration-200
             shadow-md ${!reserved
@@ -99,4 +100,5 @@ const BingoCard = ({ card }) => {
     </div>
   );
 };
+
 export default BingoCard;

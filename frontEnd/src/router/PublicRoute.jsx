@@ -1,16 +1,18 @@
-import React from "react";
+// src/routes/PublicRoute.jsx
+import React, { useContext } from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import useAuthStore from "../hooks/useAuth";
+import AuthContext from "../contexts/AuthContext.jsx";
 
 function PublicRoute() {
-  const { isLoggedIn } = useAuthStore();
+  const { isLoggedIn, loading } = useContext(AuthContext);
 
-  // Redirect logged-in users to dashboard or home
-  if (isLoggedIn) {
-    return <Navigate to="/" replace />;
-  }
+  // Wait until auth check finishes
+  if (loading) return null; // optional: show a spinner
 
-  return <Outlet />; // render login/register pages
+  // Redirect logged-in users to home
+  if (isLoggedIn) return <Navigate to="/" replace />;
+
+  return <Outlet />;
 }
 
 export default PublicRoute;

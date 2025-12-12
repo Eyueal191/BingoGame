@@ -1,9 +1,7 @@
 // src/api/axiosInstance.js
 import axios from "axios";
-import  authStore  from "../stores/authStore.js"; // use store directly
-
 const Axios = axios.create({
-  baseURL:"https://bingogameservice.onrender.com",
+  baseURL:"http://localhost:5000",
   headers: {
     "Content-Type": "application/json",
   },
@@ -12,7 +10,7 @@ const Axios = axios.create({
 // Attach token automatically
 Axios.interceptors.request.use(
   (config) => {
-    const token = authStore.getState().token; // get token from store
+    const token = localStorage.getItem("authToken")
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

@@ -1,37 +1,45 @@
-import React, { useEffect, useState } from "react";
+// src/routes/ProtectedRoute.jsx
+import React, { useEffect, useState, useContext } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
-import useAuthStore from "../hooks/useAuth";
+import AuthContext from "../contexts/AuthContext.jsx";
 
 function ProtectedRoute() {
-  const { checkAuth, isLoggedIn } = useAuthStore();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true); // show outlet only after auth check
+  const { isLoggedIn, checkAuth, loading: authLoading } = useContext(AuthContext);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const verifyAuth = async () => {
-      // If no token, logout immediately
-      const tokenExists = localStorage.getItem("token");
-      if (!tokenExists) {
-        navigate("/login", { replace: true });
-        return;
-      }
+    let isMounted = true;
 
-      const authenticated = await checkAuth();
-      if (!authenticated) {
-        navigate("/login", { replace: true });
-      } else {
-        setLoading(false);
+    const verifyAuth = async () => {
+      if (!isMounted) return;
+
+      try {
+        const authenticated = await checkAuth();
+
+        if (!authenticated && isMounted) {
+          navigate("/login", { replace: true });
+        } else if (authenticated && isMounted) {
+          setLoading(false);
+        }
+      } catch {
+        if (isMounted) navigate("/login", { replace: true });
       }
     };
 
-    verifyAuth();
+    // Run immediately if not logged in
+    if (!isLoggedIn) {
+      verifyAuth();
+    } else {
+      setLoading(false);
+    }
 
-    const intervalId = setInterval(verifyAuth, 60 * 1000); // check every 1 min
-    return () => clearInterval(intervalId);
-  }, [checkAuth, navigate]);
+    return () => {
+      isMounted = false;
+    };
+  }, [isLoggedIn, navigate, checkAuth]);
 
-  // Show nothing or a loading spinner until auth verified
-  if (loading && !isLoggedIn) return null;
+  if (loading || authLoading) return null; // can show spinner
 
   return <Outlet />;
 }

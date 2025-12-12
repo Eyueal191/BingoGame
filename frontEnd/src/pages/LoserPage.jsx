@@ -2,12 +2,13 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Trophy, Users, CheckCircle, Star } from "lucide-react";
-import CountDownPageBg from "../assets/CountDownPage.png";
-import useAuthStore from "../hooks/useAuth.js";
+import CountDownPageBg from "../assets/CountDownPage.png"
+import { useContext } from "react";
+import AuthContext from "../contexts/AuthContext.jsx";
 
 const LoserPage = () => {
   const navigate = useNavigate();
-  const { user } = useAuthStore();
+  const { user } = useContext(AuthContext);
   const playerCount = Number(localStorage.getItem("playerCount")) || 0;
 
   // Auto navigate to dashboard/home after 200 seconds

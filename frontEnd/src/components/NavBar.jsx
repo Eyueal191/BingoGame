@@ -2,11 +2,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/BingoLogo.png";
-import useAuthStore from "../hooks/useAuth.js";
+
+import { useContext } from "react";
+import AuthContext from "../contexts/AuthContext.jsx";
 
 const NavBar = () => {
   const navigate = useNavigate();
-  const { logout, user } = useAuthStore();
+  const { logout, user } = useContext(AuthContext);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleLogout = () => {

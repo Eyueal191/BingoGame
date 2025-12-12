@@ -1,15 +1,14 @@
 // src/pages/LoginPage.jsx
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import Axios from "../api/axiosInstance.js";
-import useAuthStore from "../hooks/useAuth.js";
-import socket, { connectSocket } from "../services/socket";
+import AuthContext from "../contexts/AuthContext.jsx";
 import CountDownPage from "../assets/CountDownPage.png";
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const { login } = useAuthStore();
+  const { login } = useContext(AuthContext);
 
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
@@ -31,17 +30,12 @@ const LoginPage = () => {
 
       if (res.data.success) {
         const user = res.data.user;
+        const token = res.data.token; // make sure API returns token
 
-        // Save userId to localStorage
-        localStorage.setItem("userId", user._id);
+        // Save user & token via context
+        login(user, token);
 
-        // Attach userId to socket.auth and connect
-        socket.auth = { userId: user._id };
-        connectSocket();
-
-        // Update Zustand store
-        login(user, res.data.token);
-
+        // Navigate to protected home/dashboard
         navigate("/");
       }
     } catch (err) {
@@ -65,7 +59,6 @@ const LoginPage = () => {
 
       {/* Main content */}
       <div className="relative z-10 w-full max-w-md sm:max-w-lg lg:max-w-xl p-6 sm:p-8 md:p-10 bg-gray-800/80 backdrop-blur-lg rounded-3xl shadow-2xl animate-float">
-        {/* Floating animation */}
         <style>{`
           @keyframes float {
             0% { transform: translateY(0px); }
@@ -77,19 +70,16 @@ const LoginPage = () => {
           }
         `}</style>
 
-        {/* Header */}
         <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-center text-green-400 mb-8 animate-pulse">
           Welcome Back!
         </h2>
 
-        {/* Error message */}
         {error && (
           <div className="bg-red-700 text-red-100 p-3 rounded-lg mb-5 text-center font-semibold text-sm sm:text-base">
             {error}
           </div>
         )}
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           {/* Email */}
           <div>
@@ -139,7 +129,6 @@ const LoginPage = () => {
             </button>
           </div>
 
-          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
@@ -150,7 +139,6 @@ const LoginPage = () => {
           </button>
         </form>
 
-        {/* Signup link */}
         <p className="mt-6 text-center text-gray-200 text-sm sm:text-base">
           Don't have an account?{" "}
           <span

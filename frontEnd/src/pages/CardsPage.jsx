@@ -1,40 +1,49 @@
-import React, { useEffect, useState, useMemo } from "react";
+// src/pages/CardsPage.jsx
+import React, { useEffect, useState, useMemo, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import useCardsStore from "../hooks/useCards.js";
+import { SocketContext } from "../contexts/SocketContext.jsx";
 import BingoCard from "../components/BingoCard";
 
 const CardsPage = () => {
-  const { cards, loading, attachListeners, cleanup, reservedcardCount } = useCardsStore();
+  const {
+    cards = [], // default to empty array
+    reservedcardCount = 0,
+    getAllCards,
+    resetReservations,
+  } = useContext(SocketContext);
+
   const [searchedNumber, setSearchedNumber] = useState("");
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Attach WebSocket listeners
+  // Fetch all cards once on mount
   useEffect(() => {
-    attachListeners();
-    return () => cleanup();
-  }, [attachListeners, cleanup]);
-
-  // Filter cards (memoized for performance)
-  const filteredCards = useMemo(() => {
-    if (!searchedNumber.trim()) return cards;
-    return cards.filter((c) => c.number === Number(searchedNumber));
-  }, [searchedNumber, cards]);
-
-  // Navigate automatically when reserved count reaches 2
-  useEffect(() => {
-    if (reservedcardCount >= 2){
-        setTimeout(() => {
-             navigate("/countdown")
-        },2000);
+    const fetchCards = async () => {
+      await getAllCards?.();
+      setLoading(false);
     };
+    fetchCards();
+  }, []); // empty dependency array ensures it runs only once
+
+  // Navigate automatically when reserved cards reach 2
+  useEffect(() => {
+    if (reservedcardCount >= 2) {
+      const timer = setTimeout(() => navigate("/countdown"), 2000);
+      return () => clearTimeout(timer);
+    }
   }, [reservedcardCount, navigate]);
 
-  const reservedCards = filteredCards.filter((c) => c.reserved);
-  const availableCards = filteredCards.filter((c) => !c.reserved);
+  // Filter cards based on search input
+  const filteredCards = useMemo(() => {
+    if (!searchedNumber.trim()) return cards;
+    return cards.filter((c) => c?.number === Number(searchedNumber));
+  }, [searchedNumber, cards]);
+
+  const reservedCards = filteredCards.filter((c) => c?.reserved);
+  const availableCards = filteredCards.filter((c) => !c?.reserved);
 
   return (
     <div className="p-6 md:p-10 font-sans mt-20">
-
       {/* HEADER + SEARCH */}
       <div className="mb-10">
         <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight text-neutral-900 mb-6">
@@ -81,7 +90,7 @@ const CardsPage = () => {
 };
 
 /** -----------------------------------
- *   Reusable StatCard Component
+ * Reusable StatCard Component
  * ----------------------------------- */
 const StatCard = ({ title, value, color }) => (
   <div className="rounded-2xl p-6 bg-white shadow-md border border-neutral-200 hover:shadow-lg transition-all">

@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+// src/components/PlayCard.jsx
+import React, { useEffect, useState, useContext } from "react";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import useGameStore from "../hooks/useGame.js";
-import useCardStore from "../hooks/useCards.js";
-import useAuthStore from "../stores/authStore.js";
+import AuthContext from "../contexts/AuthContext.jsx";
+import { SocketContext } from "../contexts/SocketContext.jsx";
 import {
   groupCalledNumbers,
   extractMarkedValues,
@@ -12,70 +12,108 @@ import {
 } from "../utils/validators.js";
 
 function PlayCard({ card, calledNumbers = [] }) {
-  const { gameSession, updateGameSession, resetGame } = useGameStore();
   const { numbers: bingoNumbers = {} } = card;
-  const { user } = useAuthStore();
-  const { resetReservations,  reservedcardCount} = useCardStore();
+  const { user } = useContext(AuthContext);
+  const {
+    gameSession,
+    updateGameSession,
+    resetGame,
+    resetReservations,
+  } = useContext(SocketContext);
+
   const userId = user?._id;
-  const bingoHeader = ["B", "I", "N", "G", "O"];
   const navigate = useNavigate();
+  const bingoHeader = ["B", "I", "N", "G", "O"];
 
   const [marked, setMarked] = useState({
-    B: bingoNumbers.B?.map((num, row) => ({ value: num, row, col: 0, marked: false, isFree: false })) || [],
-    I: bingoNumbers.I?.map((num, row) => ({ value: num, row, col: 1, marked: false, isFree: false })) || [],
-    N: bingoNumbers.N?.map((num, row) => ({ value: num, row, col: 2, marked: row === 2, isFree: row === 2 })) || [],
-    G: bingoNumbers.G?.map((num, row) => ({ value: num, row, col: 3, marked: false, isFree: false })) || [],
-    O: bingoNumbers.O?.map((num, row) => ({ value: num, row, col: 4, marked: false, isFree: false })) || [],
+    B: bingoNumbers.B?.map((num, row) => ({
+      value: num,
+      row,
+      col: 0,
+      marked: false,
+      isFree: false,
+    })) || [],
+    I: bingoNumbers.I?.map((num, row) => ({
+      value: num,
+      row,
+      col: 1,
+      marked: false,
+      isFree: false,
+    })) || [],
+    N: bingoNumbers.N?.map((num, row) => ({
+      value: num,
+      row,
+      col: 2,
+      marked: row === 2, // free center
+      isFree: row === 2,
+    })) || [],
+    G: bingoNumbers.G?.map((num, row) => ({
+      value: num,
+      row,
+      col: 3,
+      marked: false,
+      isFree: false,
+    })) || [],
+    O: bingoNumbers.O?.map((num, row) => ({
+      value: num,
+      row,
+      col: 4,
+      marked: false,
+      isFree: false,
+    })) || [],
   });
 
   // Toggle mark on a cell
   const toggleMark = (col, idx) => {
     setMarked((prev) => ({
       ...prev,
-      [col]: prev[col].map((cell, i) => (i === idx ? { ...cell, marked: !cell.marked } : cell)),
+      [col]: prev[col].map((cell, i) =>
+        i === idx ? { ...cell, marked: !cell.marked } : cell
+      ),
     }));
   };
 
   // Handle Bingo claim
   const claimBingo = async () => {
-    if (!gameSession) {
-      toast.error("Cannot claim bingo: game not started");
+    if (!gameSession?._id) {
+      toast.error("Cannot claim bingo: game not started yet!");
       return;
     }
 
     const markedValues = extractMarkedValues(marked);
     const calledNumbersGrouped = groupCalledNumbers(calledNumbers);
 
-    // Check if all marked numbers were called
     if (!areMarkedNumbersCalled(markedValues, calledNumbersGrouped)) {
       toast.error("No, you are not a winner yet.");
       return;
     }
 
-    // Check winning pattern
     const patternMatch = validateBingoCard(marked);
     if (!patternMatch) {
-  
       toast.info("No winning pattern yet.");
       return;
     }
 
-    // ✅ Update game session in store
-    const updatedSession = { ...gameSession, endTime: new Date(), winner: userId };
-    updateGameSession(updatedSession);
+    try {
+      // Update game session with winner
+      updateGameSession({ ...gameSession, endTime: new Date(), winner: userId });
 
-    // ✅ Reset game and reservations using existing stores
-    await resetGame(userId);       // triggers game_reset socket event
-    await resetReservations();      // triggers reset_reservation socket event
-    
-    // ✅ Navigate after reset
-    navigate("/winner");
+      // Reset game and reservations via socket context
+      await resetGame(gameSession); // pass actual game session
+      await resetReservations();
 
-    toast.success("Bingo! You are the winner!");
+      toast.success("Bingo! You are the winner!");
+      navigate("/winner");
+    } catch (err) {
+      console.error("Error claiming bingo:", err);
+      toast.error("Error claiming bingo. Try again.");
+    }
   };
-useEffect(()=>{
-  localStorage.setItem("playerCount", reservedcardCount);
-})
+
+  useEffect(() => {
+    localStorage.setItem("playerCount", userId || 0);
+  }, [userId]);
+
   if (!userId) return <h1>UserId is not defined.</h1>;
 
   return (

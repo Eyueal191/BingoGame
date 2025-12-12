@@ -10,11 +10,18 @@ console.log("MONGO_URI:", process.env.MONGO_URI);
 const app = express();
 // Connect to MongoDB
 connectDB();
-// Enable CORS for frontend
-app.use(cors({
-  origin: "http://localhost:5173", // React frontend URL
-  credentials: true, // allow cookies/auth headers if needed
-}));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true); // allow requests without origin (e.g. Postman)
+      console.log("🌍 CORS request from:", origin); // optional, for debugging
+      return callback(null, true); // dynamically allow all origins
+    },
+    credentials: true, // ✅ enables cookies, tokens, etc.
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+); 
 // Middleware to parse JSON requests
 app.use(express.json());
 // Auth routes
