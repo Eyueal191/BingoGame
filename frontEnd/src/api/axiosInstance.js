@@ -1,7 +1,7 @@
 // src/api/axiosInstance.js
 import axios from "axios";
 const Axios = axios.create({
-  baseURL:"http://localhost:5000",
+  baseURL:"https://bingogame-5pg5.onrender.com",
   headers: {
     "Content-Type": "application/json",
   },
