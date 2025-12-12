@@ -1,7 +1,7 @@
 import React, { createContext, useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 
-const SOCKET_URL = "http://localhost:5000";
+const SOCKET_URL = "https://bingogame-5pg5.onrender.com";
 
 export const SocketContext = createContext();
 
